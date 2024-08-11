@@ -298,9 +298,10 @@ class _MainScreenState extends State<MainScreen> {
                 const Text(
                   'Transactions',
                   style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600),
+                    fontSize: 20,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 InkWell(
                   onTap: () {},

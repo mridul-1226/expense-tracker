@@ -116,7 +116,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? state.totalExpense
                         : state.totalExpense + newExpense!.amount,
                   )
-                : const StatsScreen(),
+                : BlocBuilder<GetCategoryBloc, GetCategoryState>(
+                    builder: (context, state) {
+                      if (state is GetCategorySuccess) {
+                        return StatsScreen(
+                          categories: state.categories,
+                        );
+                      }
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                  ),
             backgroundColor: Theme.of(context).colorScheme.surface,
           );
         } else {

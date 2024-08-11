@@ -1,4 +1,5 @@
 import 'package:expense_repository/expense_repository.dart';
+import 'package:expense_tracker/screens/add_expense/blocs/get_category_bloc/get_category_bloc.dart';
 import 'package:expense_tracker/screens/home/bloc/get_expenses_bloc/get_expenses_bloc.dart';
 import 'package:expense_tracker/screens/home/views/home_screen.dart';
 import 'package:expense_tracker/simple_bloc_observer.dart';
@@ -26,13 +27,21 @@ class MyApp extends StatelessWidget {
           onSurface: Colors.black,
           primary: const Color(0xFF7303c0),
           secondary: const Color(0xFFec38bc),
-          tertiary: const Color(0xFFfdeff9),          
+          tertiary: const Color(0xFFfdeff9),
           outline: Colors.grey[400],
         ),
       ),
-      home: BlocProvider(
-        create: (context) =>
-            GetExpensesBloc(FirebaseExpenseRepository())..add(GetExpenses()),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => GetExpensesBloc(FirebaseExpenseRepository())
+              ..add(GetExpenses()),
+          ),
+          BlocProvider(
+            create: (context) => GetCategoryBloc(FirebaseExpenseRepository())
+              ..add(GetCategory()),
+          ),
+        ],
         child: const HomeScreen(),
       ),
       debugShowCheckedModeBanner: false,

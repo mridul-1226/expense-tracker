@@ -42,6 +42,12 @@ class FirebaseExpenseRepository implements ExpenseRepository {
       await expenseCollection
           .doc(expense.expenseId)
           .set(expense.toEntity().toMap());
+
+      var categoryDoc = categoryCollection.doc(expense.category.categoryId);
+      DocumentSnapshot snapshot = await categoryDoc.get();
+      if(!snapshot.exists) throw Exception('Document does not exist');
+      var data = snapshot.data() as Map<String, dynamic>?;
+      categoryDoc.update({'totalExpense': data?['totalExpense'] + expense.amount});
     } catch (e) {
       throw e.toString();
     }

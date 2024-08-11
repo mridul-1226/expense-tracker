@@ -10,4 +10,5 @@ abstract class ExpenseRepository {
   Future<List<Expense>> getExpenses();
 
   Future<int> getTotalExpense();
+
 }
