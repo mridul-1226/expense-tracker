@@ -1,4 +1,5 @@
 import 'package:expense_repository/expense_repository.dart';
+import 'package:expense_tracker/main.dart';
 import 'package:expense_tracker/screens/add_expense/blocs/create_expense/create_expense_bloc.dart';
 import 'package:expense_tracker/screens/add_expense/blocs/get_category_bloc/get_category_bloc.dart';
 import 'package:expense_tracker/screens/add_expense/views/category_creation.dart';
@@ -42,7 +43,14 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
     return BlocListener<CreateExpenseBloc, CreateExpenseState>(
       listener: (context, state) {
         if (state is CreateExpenseSuccess) {
-          Navigator.pop(context, expense);
+          // Navigator.pop(context, expense);
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MyApp(),
+            ),
+            (route) => false,
+          );
         } else if (state is CreateExpenseLoading) {
           setState(() {
             isLoading = true;

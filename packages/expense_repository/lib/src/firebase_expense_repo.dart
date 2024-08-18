@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_repository/expense_repository.dart';
+import 'package:intl/intl.dart';
 
 class FirebaseExpenseRepository implements ExpenseRepository {
   final categoryCollection =
       FirebaseFirestore.instance.collection('categories');
   final expenseCollection = FirebaseFirestore.instance.collection('expenses');
+
+  final budgetCollection = FirebaseFirestore.instance.collection('budget');
 
   @override
   Future<void> createCategory(Category category) async {
@@ -20,7 +23,7 @@ class FirebaseExpenseRepository implements ExpenseRepository {
   @override
   Future<List<Category>> getCategory() async {
     try {
-      return await categoryCollection.get().then(
+      List<Category> categories = await categoryCollection.get().then(
             (value) => value.docs
                 .map(
                   (e) => Category.fromEntity(
@@ -31,6 +34,9 @@ class FirebaseExpenseRepository implements ExpenseRepository {
                 )
                 .toList(),
           );
+
+          categories.sort((a, b) => b.totalExpense.compareTo(a.totalExpense),);
+          return categories;
     } catch (e) {
       throw e.toString();
     }
@@ -45,9 +51,10 @@ class FirebaseExpenseRepository implements ExpenseRepository {
 
       var categoryDoc = categoryCollection.doc(expense.category.categoryId);
       DocumentSnapshot snapshot = await categoryDoc.get();
-      if(!snapshot.exists) throw Exception('Document does not exist');
+      if (!snapshot.exists) throw Exception('Document does not exist');
       var data = snapshot.data() as Map<String, dynamic>?;
-      categoryDoc.update({'totalExpense': data?['totalExpense'] + expense.amount});
+      categoryDoc
+          .update({'totalExpense': data?['totalExpense'] + expense.amount});
     } catch (e) {
       throw e.toString();
     }
@@ -56,17 +63,20 @@ class FirebaseExpenseRepository implements ExpenseRepository {
   @override
   Future<List<Expense>> getExpenses() async {
     try {
-      return await expenseCollection.get().then(
-            (value) => value.docs
-                .map(
-                  (e) => Expense.fromEntity(
-                    ExpenseEntity.fromMap(
-                      e.data(),
-                    ),
+      List<Expense> expenses =
+          await expenseCollection.get().then((value) => value.docs
+              .map(
+                (e) => Expense.fromEntity(
+                  ExpenseEntity.fromMap(
+                    e.data(),
                   ),
-                )
-                .toList(),
-          );
+                ),
+              )
+              .toList());
+      expenses.sort(
+        (a, b) => b.dateTime.compareTo(a.dateTime),
+      );
+      return expenses;
     } catch (e) {
       throw e.toString();
     }
@@ -87,6 +97,46 @@ class FirebaseExpenseRepository implements ExpenseRepository {
       return totalExpenses.toInt();
     } catch (e) {
       throw e.toString();
+    }
+  }
+
+  @override
+  Future<void> setMonthlyBudget(int budget) async {
+    // Get the current month and year
+    DateTime now = DateTime.now();
+    String month = DateFormat('MM').format(now); // e.g., '08' for August
+    String year = DateFormat('yyyy').format(now); // e.g., '2024'
+
+    // Create a document ID like 'budget_08_2024'
+    String documentId = 'budget_${month}_$year';
+
+    // Reference to the user's budget for the specific month
+    await budgetCollection.doc(documentId).set({
+      'month': month,
+      'year': year,
+      'budget': budget,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<int?> getMonthlyBudget() async {
+    // Get the current month and year
+    DateTime now = DateTime.now();
+    String month = DateFormat('MM').format(now); // e.g., '08' for August
+    String year = DateFormat('yyyy').format(now); // e.g., '2024'
+
+    // Create a document ID like 'budget_08_2024'
+    String documentId = 'budget_${month}_$year';
+
+    // Fetch the budget document
+    DocumentSnapshot snapshot = await budgetCollection.doc(documentId).get();
+
+    if (snapshot.exists) {
+      var data = snapshot.data() as Map<String, dynamic>;
+      return data['budget'] as int?;
+    } else {
+      return null;
     }
   }
 }

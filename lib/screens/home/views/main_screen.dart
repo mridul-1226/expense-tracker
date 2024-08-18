@@ -15,9 +15,31 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  ExpenseRepository expenseRepository = FirebaseExpenseRepository();
   TextEditingController budgetController = TextEditingController();
   String budget = "0";
   int budgetUtilized = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    expenseRepository.getMonthlyBudget().then(
+      (value) {
+        if (value != null) {
+          setState(() {
+            budget = value.toString();
+            budgetUtilized = (int.parse(budget) - widget.totalExpense) * 100;
+            budgetUtilized = budgetUtilized ~/ int.parse(budget);
+          });
+        }
+      },
+    );
+  }
+
+  void setBudget(int budget) async {
+    await expenseRepository.setMonthlyBudget(budget);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -69,7 +91,7 @@ class _MainScreenState extends State<MainScreen> {
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(CupertinoIcons.settings),
+                  icon: const Icon(Icons.edit),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -117,6 +139,9 @@ class _MainScreenState extends State<MainScreen> {
                                     budgetUtilized ~/ int.parse(budget);
                                 budgetController.text = "";
                               });
+
+                              setBudget(int.parse(budget));
+
                               Navigator.pop(context);
                             },
                             child: const Text(
@@ -181,16 +206,23 @@ class _MainScreenState extends State<MainScreen> {
                   const SizedBox(
                     height: 4,
                   ),
-                  Text(
-                    'You have $budgetUtilized% remaining of you budget',
-                    style: TextStyle(
-                      color: budgetUtilized > 50
-                          ? Colors.green
-                          : budgetUtilized > 20
-                              ? Colors.yellow
-                              : Colors.red,
-                      fontSize: 20,
-                      backgroundColor: Colors.grey[300],
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      'You have $budgetUtilized% remaining of your budget',
+                      style: TextStyle(
+                        color: budgetUtilized > 50
+                            ? Colors.green
+                            : budgetUtilized > 20
+                                ? Colors.yellow
+                                : Colors.red,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                   Padding(

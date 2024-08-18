@@ -11,4 +11,7 @@ abstract class ExpenseRepository {
 
   Future<int> getTotalExpense();
 
+  Future<void> setMonthlyBudget(int budget);
+
+  Future<int?> getMonthlyBudget();
 }

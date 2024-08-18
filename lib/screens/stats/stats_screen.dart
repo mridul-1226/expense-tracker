@@ -33,7 +33,9 @@ class StatsScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
               decoration: BoxDecoration(
                   color: Colors.white, borderRadius: BorderRadius.circular(12)),
-              child: const MyBarChart(),
+              child: MyBarChart(
+                categories: categories,
+              ),
             ),
             const SizedBox(
               height: 40,

@@ -7,6 +7,7 @@ import 'package:expense_tracker/screens/add_expense/views/add_expenses_screen.da
 import 'package:expense_tracker/screens/home/bloc/get_expenses_bloc/get_expenses_bloc.dart';
 import 'package:expense_tracker/screens/home/views/main_screen.dart';
 import 'package:expense_tracker/screens/stats/stats_screen.dart';
+import 'package:expense_tracker/utils/shimmer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -123,15 +124,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           categories: state.categories,
                         );
                       }
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const CustomShimmer();
                     },
                   ),
             backgroundColor: Theme.of(context).colorScheme.surface,
           );
         } else {
-          return const Center(child: CircularProgressIndicator());
+          return const CustomShimmer();
         }
       },
     );
